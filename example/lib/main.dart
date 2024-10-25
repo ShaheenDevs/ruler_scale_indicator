@@ -22,7 +22,7 @@ class ScaleRulerExampleApp extends StatelessWidget {
             maxRange: 10,
             lineSpacing: 0.2,
             rulerHeight: 120,
-            decimalPlaces: 0,
+            decimalPlaces: 1,
             onChange: (e){
               log("======>$e");
             },
