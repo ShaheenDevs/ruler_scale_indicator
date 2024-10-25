@@ -18,7 +18,7 @@ class ScaleRulerExampleApp extends StatelessWidget {
           child: ScaleRuler(
             minRange: 0,
             maxRange: 1000,
-            lineSpacing: 30,
+            lineSpacing: 0.2,
             rulerHeight: 120,
             decimalPlaces: 0,
           ),

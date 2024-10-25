@@ -1,40 +1,76 @@
-<!--
-This README describes the package. If you publish this package to pub.dev,
-this README's contents appear on the landing page for your package.
+# Ruler Scale Indicator
 
-For information about how to write a good package README, see the guide for
-[writing package pages](https://dart.dev/tools/pub/writing-package-pages).
-
-For general information about developing packages, see the Dart guide for
-[creating packages](https://dart.dev/guides/libraries/create-packages)
-and the Flutter guide for
-[developing packages and plugins](https://flutter.dev/to/develop-packages).
--->
-
-TODO: Put a short description of the package here that helps potential users
-know whether this package might be useful for them.
+A Flutter package that provides a customizable and interactive scale ruler widget. It allows users to create a horizontal scrollable ruler, suitable for measuring ranges in various applications, with customizable line spacing, ruler height, alignment, and more.
 
 ## Features
 
-TODO: List what your package can do. Maybe include images, gifs, or videos.
+- **Adjustable Range:** Set minimum and maximum values for the ruler.
+- **Customizable Line Spacing:** Define the spacing between each line.
+- **Variable Ruler Height:** Adjust the height of the ruler to fit different UI designs.
+- **Alignment Options:** Choose between top or bottom alignment of the scale.
+- **Real-time Value Display:** Shows the current value as the user scrolls.
+- **Decimal Precision:** Define the number of decimal places for displayed values.
 
-## Getting started
+## Preview
 
-TODO: List prerequisites and provide or point to information on how to
-start using the package.
+![Scale Ruler GIF](https://raw.githubusercontent.com/your-username/ruler_scale_indicator/main/assets/scale_ruler_preview.gif)
 
-## Usage
+#### Installation:
+To use this package in your Flutter project, add it to your pubspec.yaml file:
 
-TODO: Include short and useful examples for package users. Add longer examples
-to `/example` folder.
+    dependencies:
+      firebase_realtime_chat: ^version_number
+Then, run `flutter pub get` to install the package.
 
-```dart
-const like = 'sample';
-```
+##### Usage:
+###### Import the package in your Dart file:
 
-## Additional information
+    import 'package:ruler_scale_indicator/ruler_scale_indicator.dart';
 
-TODO: Tell users more about the package: where to find more information, how to
-contribute to the package, how to file issues, what response they can expect
-from the package authors, and more.
-# ruler_scale_indicator
+
+#### Basic Example:
+##### Here's an example of how to use the `ScaleRuler` widget in your Flutter app:
+
+      ScaleRuler(
+        minRange: 0,
+        maxRange: 500,
+        lineSpacing: 0.5,
+        rulerHeight: 150,
+        decimalPlaces: 2,
+        alignmentPosition: AlignmentPosition.bottom,
+        ),
+
+
+### Contributing:
+Contributions are welcome! Feel free to submit issues or pull requests on GitHub.
+
+### License:
+This package is licensed under the `GNU General Public License v3.0` License.
+
+#### Author:
+`Mudassir Mukhtar`
+
+#### Contact:
+ <a href="https://www.linkedin.com/in/mudassir-mukhtar-17aa89196/" target="_blank" rel="noopener noreferrer">
+   <img src="https://img.shields.io/badge/LinkedIn-Profile-blue?logo=linkedin&logoColor=white&color=blue" />
+ </a>
+ <a href="mailto:mudassirmukhtar4@gmail.com" target="_blank" rel="noopener noreferrer">
+   <img src="https://img.shields.io/badge/Gmail-Address-red?logo=gmail&logoColor=white&color=blue" />
+ </a>
+ <a href="https://wa.me/+923454335400" target="_blank" rel="noopener noreferrer">
+   <img src="https://img.shields.io/badge/Whatsapp-Number-blue?logo=whatsapp&logoColor=white&color=blue" />
+ </a>
+  <a href="https://www.facebook.com/lovely06mian" target="_blank" rel="noopener noreferrer">
+   <img src="https://img.shields.io/badge/Facebook-Profile-blue?logo=facebook&logoColor=white&color=blue" />
+ </a>
+
+##### Acknowledgments:
+Thank you to the Flutter community for their contributions and support.
+
+#### Support:
+For any questions or assistance, please reach out to the author or open an issue on GitHub.
+
+#### Disclaimer:
+This package is provided as-is without any warranty. Use it at your own discretion.
+
+# Happy Coding! 🚀

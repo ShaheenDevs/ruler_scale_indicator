@@ -22,7 +22,7 @@ class ScaleRuler extends StatefulWidget {
     required this.lineSpacing,
     required this.rulerHeight,
     required this.decimalPlaces,
-    this.alignmentPosition = AlignmentPosition.bottom, // Default alignment
+    this.alignmentPosition = AlignmentPosition.top, // Default alignment
   });
 
   @override
@@ -30,70 +30,102 @@ class ScaleRuler extends StatefulWidget {
 }
 
 class _ScaleRulerState extends State<ScaleRuler> {
+  final ScrollController _scrollController = ScrollController();
   double _selectedPosition = 0.0;
 
   @override
   Widget build(BuildContext context) {
-    double widgetWidth = MediaQuery.of(context).size.width - 40;
+    double scaleWidth =
+        (widget.maxRange - widget.minRange) / widget.lineSpacing * 20;
 
-    return GestureDetector(
-      onHorizontalDragUpdate: (details) {
-        setState(() {
-          _selectedPosition += details.delta.dx;
-          _selectedPosition = _selectedPosition.clamp(0.0, widgetWidth);
-        });
-
-        // Calculate and log the selected value
-        double selectedValue = widget.minRange +
-            (_selectedPosition /
-                widgetWidth *
-                (widget.maxRange - widget.minRange));
-        log('Selected Value: ${selectedValue.toStringAsFixed(widget.decimalPlaces)}');
-      },
-      child: Stack(
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(top: 20.0),
-            child: Container(
-              width: double.infinity,
-              height: widget.rulerHeight,
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: CustomPaint(
-                painter: ScaleRulerPainter(
-                  minRange: widget.minRange,
-                  maxRange: widget.maxRange,
-                  lineSpacing: widget.lineSpacing,
-                  rulerHeight: widget.rulerHeight,
-                  alignmentPosition: widget.alignmentPosition,
+    return Column(
+      children: [
+        Stack(
+          children: [
+            // Scrollable scale ruler
+            Padding(
+              padding: EdgeInsets.only(
+                  top: widget.alignmentPosition == AlignmentPosition.top
+                      ? 60
+                      : 0),
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                controller: _scrollController,
+                child: Padding(
+                  padding: const EdgeInsets.only(left:  200, right: 200),
+                  child: CustomPaint(
+                    size: Size(scaleWidth, widget.rulerHeight),
+                    painter: ScaleRulerPainter(
+                      minRange: widget.minRange,
+                      maxRange: widget.maxRange,
+                      lineSpacing: widget.lineSpacing,
+                      rulerHeight: widget.rulerHeight,
+                      alignmentPosition: widget.alignmentPosition,
+                    ),
+                  ),
                 ),
               ),
             ),
-          ),
-          Positioned(
-            left: _selectedPosition,
-            bottom: widget.alignmentPosition == AlignmentPosition.bottom ? 0 : null,
-            top: widget.alignmentPosition == AlignmentPosition.top ? 0 : null,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Container(
-                  width: 2,
-                  height: 60,
-                  color: Colors.red,
-                ),
-                Text(
-                  (_selectedPosition /
-                              widgetWidth *
-                              (widget.maxRange - widget.minRange) +
-                          widget.minRange)
-                      .toStringAsFixed(widget.decimalPlaces),
-                ),
-              ],
+            // Red pointer indicator
+            Align(
+              alignment: Alignment.center,
+              child: Column(
+                mainAxisAlignment:
+                    widget.alignmentPosition == AlignmentPosition.bottom
+                        ? MainAxisAlignment.end
+                        : MainAxisAlignment.start,
+                children: [
+                  if (widget.alignmentPosition == AlignmentPosition.top) ...[
+                    _buildPointer(),
+                  ],
+                  if (widget.alignmentPosition == AlignmentPosition.bottom) ...[
+                    _buildPointer(),
+                  ],
+                ],
+              ),
             ),
-          ),
-        ],
-      ),
+          ],
+        ),
+      ],
     );
+  }
+
+  Widget _buildPointer() {
+    return Column(
+      children: [
+        if (_scrollController.hasClients) // Check if controller is attached
+          Text(
+            (_selectedPosition /
+                        (_scrollController.position.maxScrollExtent /
+                            (widget.maxRange - widget.minRange)) +
+                    widget.minRange)
+                .toStringAsFixed(widget.decimalPlaces),
+          ),
+        Container(
+          width: 2,
+          height: widget.rulerHeight / 2,
+          color: Colors.red,
+        ),
+      ],
+    );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(() {
+      if (_scrollController.hasClients) {
+        setState(() {
+          _selectedPosition = _scrollController.offset;
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 }
 
@@ -131,14 +163,14 @@ class ScaleRulerPainter extends CustomPainter {
 
     for (int i = 0; i <= numLines; i++) {
       double x = i * size.width / numLines;
-      double currentValue = minRange + i * (range / numLines);
+      double currentValue = minRange + i * lineSpacing;
 
       // Calculate the y offset based on alignment
-      double lineStart = alignmentPosition == AlignmentPosition.bottom
-          ? size.height
-          : 0;
+      double lineStart =
+          alignmentPosition == AlignmentPosition.bottom ? size.height : 0;
       double lineEnd = alignmentPosition == AlignmentPosition.bottom
-          ? size.height - (i % 5 == 0 ? longLine : (i % 2 == 0 ? mediumLine : shortLine))
+          ? size.height -
+              (i % 5 == 0 ? longLine : (i % 2 == 0 ? mediumLine : shortLine))
           : (i % 5 == 0 ? longLine : (i % 2 == 0 ? mediumLine : shortLine));
 
       // Draw the scale lines
