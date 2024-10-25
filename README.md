@@ -15,7 +15,7 @@ A Flutter package that provides a customizable and interactive scale ruler widge
 
 ## Preview
 
-![Scale Ruler GIF](https://raw.githubusercontent.com/ShaheenDevs/ruler_scale_indicator/blob/main/preview.gif)
+![Scale Ruler GIF](https://raw.githubusercontent.com/ShaheenDevs/ruler_scale_indicator/main/preview.gif)
 
 #### Installation:
 To use this package in your Flutter project, add it to your pubspec.yaml file:
