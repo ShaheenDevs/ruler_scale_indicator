@@ -29,28 +29,24 @@ class _ScaleRulerState extends State<ScaleRuler> {
 
   @override
   Widget build(BuildContext context) {
+    double widgetWidth = MediaQuery.of(context).size.width - 40;
+
     return GestureDetector(
       onHorizontalDragUpdate: (details) {
         setState(() {
-          // Update the selected position based on drag
           _selectedPosition += details.delta.dx;
-
-          // Constrain the position within the widget width
-          _selectedPosition = _selectedPosition.clamp(
-              0.0, MediaQuery.of(context).size.width - 40);
+          _selectedPosition = _selectedPosition.clamp(0.0, widgetWidth);
         });
 
         // Calculate and log the selected value
         double selectedValue = widget.minRange +
-            (_selectedPosition /
-                (MediaQuery.of(context).size.width - 40) *
-                (widget.maxRange - widget.minRange));
+            (_selectedPosition / widgetWidth * (widget.maxRange - widget.minRange));
         log('Selected Value: ${selectedValue.toStringAsFixed(widget.decimalPlaces)}');
       },
       child: Stack(
         children: [
           Padding(
-            padding: const EdgeInsets.only(top: 22.0),
+            padding: const EdgeInsets.only(top: 60.0),
             child: Container(
               width: double.infinity,
               height: widget.rulerHeight,
@@ -71,9 +67,7 @@ class _ScaleRulerState extends State<ScaleRuler> {
             child: Column(
               children: [
                 Text(
-                  (_selectedPosition /
-                              (MediaQuery.of(context).size.width - 40) *
-                              (widget.maxRange - widget.minRange) +
+                  (_selectedPosition / widgetWidth * (widget.maxRange - widget.minRange) +
                           widget.minRange)
                       .toStringAsFixed(widget.decimalPlaces),
                 ),
@@ -114,24 +108,27 @@ class ScaleRulerPainter extends CustomPainter {
     double mediumLine = rulerHeight / 3;
     double shortLine = rulerHeight / 4;
 
-    // Calculate the number of lines based on minRange, maxRange, and lineSpacing
+    // Calculate the number of lines
     double range = maxRange - minRange;
     int numLines = (range / lineSpacing).ceil();
 
+    // Ensure at least 10 lines for small ranges
+    numLines = numLines < 10 ? 10 : numLines;
+
     for (int i = 0; i <= numLines; i++) {
       double x = i * size.width / numLines;
-      double currentValue = minRange + i * lineSpacing;
+      double currentValue = minRange + i * (range / numLines);
 
-      if (currentValue % 50 == 0) {
-        // Long line every 50 units
+      if (i % 5 == 0) {
+        // Draw long lines every 5th unit
         canvas.drawLine(Offset(x, 0), Offset(x, longLine), paint);
         drawText(
             canvas, currentValue.toStringAsFixed(0), Offset(x, longLine + 5));
-      } else if (currentValue % 25 == 0) {
-        // Medium line every 25 units
+      } else if (i % 2 == 0) {
+        // Draw medium lines for even indices
         canvas.drawLine(Offset(x, 0), Offset(x, mediumLine), paint);
       } else {
-        // Short line for other units
+        // Draw short lines for other indices
         canvas.drawLine(Offset(x, 0), Offset(x, shortLine), paint);
       }
     }

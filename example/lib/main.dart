@@ -17,8 +17,8 @@ class ScaleRulerExampleApp extends StatelessWidget {
         body: const Center(
           child: ScaleRuler(
             minRange: 0,
-            maxRange: 100,
-            lineSpacing: 1,
+            maxRange: 1000,
+            lineSpacing: 30,
             rulerHeight: 120,
             decimalPlaces: 0,
           ),
