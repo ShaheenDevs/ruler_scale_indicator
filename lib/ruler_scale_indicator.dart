@@ -3,6 +3,9 @@ library ruler_scale_indicator;
 import 'dart:developer';
 import 'package:flutter/material.dart';
 
+/// Enum for alignment position
+enum AlignmentPosition { top, bottom }
+
 /// A customizable scale ruler widget.
 class ScaleRuler extends StatefulWidget {
   final double minRange; // Minimum value of the range
@@ -10,6 +13,7 @@ class ScaleRuler extends StatefulWidget {
   final double lineSpacing; // Spacing between each line
   final double rulerHeight; // Height of the ruler
   final int decimalPlaces; // Number of decimal places to show
+  final AlignmentPosition alignmentPosition; // Alignment of the scale
 
   const ScaleRuler({
     super.key,
@@ -18,6 +22,7 @@ class ScaleRuler extends StatefulWidget {
     required this.lineSpacing,
     required this.rulerHeight,
     required this.decimalPlaces,
+    this.alignmentPosition = AlignmentPosition.bottom, // Default alignment
   });
 
   @override
@@ -40,13 +45,15 @@ class _ScaleRulerState extends State<ScaleRuler> {
 
         // Calculate and log the selected value
         double selectedValue = widget.minRange +
-            (_selectedPosition / widgetWidth * (widget.maxRange - widget.minRange));
+            (_selectedPosition /
+                widgetWidth *
+                (widget.maxRange - widget.minRange));
         log('Selected Value: ${selectedValue.toStringAsFixed(widget.decimalPlaces)}');
       },
       child: Stack(
         children: [
           Padding(
-            padding: const EdgeInsets.only(top: 60.0),
+            padding: const EdgeInsets.only(top: 20.0),
             child: Container(
               width: double.infinity,
               height: widget.rulerHeight,
@@ -57,24 +64,29 @@ class _ScaleRulerState extends State<ScaleRuler> {
                   maxRange: widget.maxRange,
                   lineSpacing: widget.lineSpacing,
                   rulerHeight: widget.rulerHeight,
+                  alignmentPosition: widget.alignmentPosition,
                 ),
               ),
             ),
           ),
           Positioned(
             left: _selectedPosition,
-            top: 0,
+            bottom: widget.alignmentPosition == AlignmentPosition.bottom ? 0 : null,
+            top: widget.alignmentPosition == AlignmentPosition.top ? 0 : null,
             child: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                Text(
-                  (_selectedPosition / widgetWidth * (widget.maxRange - widget.minRange) +
-                          widget.minRange)
-                      .toStringAsFixed(widget.decimalPlaces),
-                ),
                 Container(
                   width: 2,
                   height: 60,
                   color: Colors.red,
+                ),
+                Text(
+                  (_selectedPosition /
+                              widgetWidth *
+                              (widget.maxRange - widget.minRange) +
+                          widget.minRange)
+                      .toStringAsFixed(widget.decimalPlaces),
                 ),
               ],
             ),
@@ -90,12 +102,14 @@ class ScaleRulerPainter extends CustomPainter {
   final double maxRange; // Maximum value of the range
   final double lineSpacing; // Spacing between each line
   final double rulerHeight; // Height of the ruler
+  final AlignmentPosition alignmentPosition; // Alignment of the scale
 
   ScaleRulerPainter({
     required this.minRange,
     required this.maxRange,
     required this.lineSpacing,
     required this.rulerHeight,
+    required this.alignmentPosition,
   });
 
   @override
@@ -119,17 +133,31 @@ class ScaleRulerPainter extends CustomPainter {
       double x = i * size.width / numLines;
       double currentValue = minRange + i * (range / numLines);
 
+      // Calculate the y offset based on alignment
+      double lineStart = alignmentPosition == AlignmentPosition.bottom
+          ? size.height
+          : 0;
+      double lineEnd = alignmentPosition == AlignmentPosition.bottom
+          ? size.height - (i % 5 == 0 ? longLine : (i % 2 == 0 ? mediumLine : shortLine))
+          : (i % 5 == 0 ? longLine : (i % 2 == 0 ? mediumLine : shortLine));
+
+      // Draw the scale lines
+      canvas.drawLine(Offset(x, lineStart), Offset(x, lineEnd), paint);
+
+      // Draw numbers for long lines
       if (i % 5 == 0) {
-        // Draw long lines every 5th unit
-        canvas.drawLine(Offset(x, 0), Offset(x, longLine), paint);
+        double textYOffset = alignmentPosition == AlignmentPosition.bottom
+            ? size.height - longLine - 15
+            : longLine + 5;
+
         drawText(
-            canvas, currentValue.toStringAsFixed(0), Offset(x, longLine + 5));
-      } else if (i % 2 == 0) {
-        // Draw medium lines for even indices
-        canvas.drawLine(Offset(x, 0), Offset(x, mediumLine), paint);
-      } else {
-        // Draw short lines for other indices
-        canvas.drawLine(Offset(x, 0), Offset(x, shortLine), paint);
+          canvas,
+          currentValue.toStringAsFixed(0),
+          Offset(
+            x - currentValue.toStringAsFixed(0).length * 3,
+            textYOffset,
+          ),
+        );
       }
     }
   }
