@@ -1,6 +1,5 @@
 library ruler_scale_indicator;
 
-import 'dart:developer';
 import 'package:flutter/material.dart';
 
 /// Enum for alignment position
@@ -12,17 +11,20 @@ class ScaleRuler extends StatefulWidget {
   final double maxRange; // Maximum value of the range
   final double lineSpacing; // Spacing between each line
   final double rulerHeight; // Height of the ruler
+  final Color pointerColor; // Number of decimal places to show
   final int decimalPlaces; // Number of decimal places to show
   final AlignmentPosition alignmentPosition; // Alignment of the scale
-
+  final Function? onChange;
   const ScaleRuler({
     super.key,
-    required this.minRange,
-    required this.maxRange,
-    required this.lineSpacing,
-    required this.rulerHeight,
-    required this.decimalPlaces,
-    this.alignmentPosition = AlignmentPosition.top, // Default alignment
+    this.minRange = 0,
+    this.maxRange = 10,
+    this.lineSpacing = 0.2,
+    this.rulerHeight = 120,
+    this.decimalPlaces = 0,
+    this.pointerColor = Colors.blue,
+    this.alignmentPosition = AlignmentPosition.bottom, // Default alignment
+    this.onChange,
   });
 
   @override
@@ -52,7 +54,8 @@ class _ScaleRulerState extends State<ScaleRuler> {
                 scrollDirection: Axis.horizontal,
                 controller: _scrollController,
                 child: Padding(
-                  padding: const EdgeInsets.only(left:  200, right: 200),
+                  padding: EdgeInsets.only(
+                      left: MediaQuery.of(context).size.width / 2, right: 200),
                   child: CustomPaint(
                     size: Size(scaleWidth, widget.rulerHeight),
                     painter: ScaleRulerPainter(
@@ -76,10 +79,10 @@ class _ScaleRulerState extends State<ScaleRuler> {
                         : MainAxisAlignment.start,
                 children: [
                   if (widget.alignmentPosition == AlignmentPosition.top) ...[
-                    _buildPointer(),
+                    _buildPointer(widget.pointerColor),
                   ],
                   if (widget.alignmentPosition == AlignmentPosition.bottom) ...[
-                    _buildPointer(),
+                    _buildPointer(widget.pointerColor),
                   ],
                 ],
               ),
@@ -90,21 +93,22 @@ class _ScaleRulerState extends State<ScaleRuler> {
     );
   }
 
-  Widget _buildPointer() {
+  Widget _buildPointer(pointerColor) {
     return Column(
       children: [
         if (_scrollController.hasClients) // Check if controller is attached
           Text(
-            (_selectedPosition /
-                        (_scrollController.position.maxScrollExtent /
-                            (widget.maxRange - widget.minRange)) +
-                    widget.minRange)
-                .toStringAsFixed(widget.decimalPlaces),
+            _selectedPosition.toStringAsFixed(widget.decimalPlaces),
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w500,
+              color: pointerColor,
+            ),
           ),
         Container(
           width: 2,
-          height: widget.rulerHeight / 2,
-          color: Colors.red,
+          height: widget.rulerHeight / 1.3,
+          color: pointerColor,
         ),
       ],
     );
@@ -116,8 +120,14 @@ class _ScaleRulerState extends State<ScaleRuler> {
     _scrollController.addListener(() {
       if (_scrollController.hasClients) {
         setState(() {
-          _selectedPosition = _scrollController.offset;
+          _selectedPosition = _scrollController.offset /
+                  (_scrollController.position.maxScrollExtent /
+                      (widget.maxRange - widget.minRange)) +
+              widget.minRange;
         });
+        if (widget.onChange != null) {
+          widget.onChange!(_selectedPosition);
+        }
       }
     });
   }

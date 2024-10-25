@@ -10,6 +10,8 @@ A Flutter package that provides a customizable and interactive scale ruler widge
 - **Alignment Options:** Choose between top or bottom alignment of the scale.
 - **Real-time Value Display:** Shows the current value as the user scrolls.
 - **Decimal Precision:** Define the number of decimal places for displayed values.
+- **Pointer Color:** Customize the color of the pointer.
+- **Value Change Callback:** Get notified when the selected value changes.
 
 ## Preview
 
@@ -39,7 +41,18 @@ Then, run `flutter pub get` to install the package.
         decimalPlaces: 2,
         alignmentPosition: AlignmentPosition.bottom,
         ),
-
+### Customization Options
+##### The ScaleRuler widget offers several customizable parameters:
+| **Parameter**       | **Type**            | **Description**                                         | **Default Value**          |
+|---------------------|---------------------|---------------------------------------------------------|----------------------------|
+| `minRange`          | `double`            | Minimum value of the ruler's range.                     | `0`                        |
+| `maxRange`          | `double`            | Maximum value of the ruler's range.                     | `10`                       |
+| `lineSpacing`       | `double`            | Spacing between each line on the ruler.                 | `0.2`                      |
+| `rulerHeight`       | `double`            | Height of the ruler widget.                             | `120`                      |
+| `decimalPlaces`     | `int`               | Number of decimal places for displayed values.          | `0`                        |
+| `pointerColor`      | `Color`             | Color of the pointer and the displayed value.           | `Colors.blue`              |
+| `alignmentPosition` | `AlignmentPosition` | Sets the alignment of the scale (top or bottom).        | `AlignmentPosition.bottom` |
+| `onChange`          | `Function?`         | Callback function that is triggered when the value changes. | `null`                  |
 
 ### Contributing:
 Contributions are welcome! Feel free to submit issues or pull requests on GitHub.
