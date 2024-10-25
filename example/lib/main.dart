@@ -17,10 +17,10 @@ class ScaleRulerExampleApp extends StatelessWidget {
         body: const Center(
           child: ScaleRuler(
             minRange: 0,
-            maxRange: 200,
-            lineSpacing: 5,
+            maxRange: 100,
+            lineSpacing: 1,
             rulerHeight: 120,
-            decimalPlaces: 2,
+            decimalPlaces: 0,
           ),
         ),
       ),

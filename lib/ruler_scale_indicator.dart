@@ -13,11 +13,11 @@ class ScaleRuler extends StatefulWidget {
 
   const ScaleRuler({
     super.key,
-    this.minRange = 0.0,
-    this.maxRange = 100.0,
-    this.lineSpacing = 10.0,
-    this.rulerHeight = 100.0,
-    this.decimalPlaces = 1, // Default to 1 decimal place
+    required this.minRange,
+    required this.maxRange,
+    required this.lineSpacing,
+    required this.rulerHeight,
+    required this.decimalPlaces,
   });
 
   @override
@@ -34,12 +34,18 @@ class _ScaleRulerState extends State<ScaleRuler> {
         setState(() {
           // Update the selected position based on drag
           _selectedPosition += details.delta.dx;
+
           // Constrain the position within the widget width
           _selectedPosition = _selectedPosition.clamp(
               0.0, MediaQuery.of(context).size.width - 40);
         });
-        // Log the selected value
-        log('Selected Position: ${_selectedPosition.toInt()}');
+
+        // Calculate and log the selected value
+        double selectedValue = widget.minRange +
+            (_selectedPosition /
+                (MediaQuery.of(context).size.width - 40) *
+                (widget.maxRange - widget.minRange));
+        log('Selected Value: ${selectedValue.toStringAsFixed(widget.decimalPlaces)}');
       },
       child: Stack(
         children: [
@@ -47,10 +53,15 @@ class _ScaleRulerState extends State<ScaleRuler> {
             padding: const EdgeInsets.only(top: 22.0),
             child: Container(
               width: double.infinity,
-              height: 100,
+              height: widget.rulerHeight,
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: CustomPaint(
-                painter: ScaleRulerPainter(),
+                painter: ScaleRulerPainter(
+                  minRange: widget.minRange,
+                  maxRange: widget.maxRange,
+                  lineSpacing: widget.lineSpacing,
+                  rulerHeight: widget.rulerHeight,
+                ),
               ),
             ),
           ),
@@ -59,7 +70,13 @@ class _ScaleRulerState extends State<ScaleRuler> {
             top: 0,
             child: Column(
               children: [
-                Text(_selectedPosition.toStringAsFixed(1)),
+                Text(
+                  (_selectedPosition /
+                              (MediaQuery.of(context).size.width - 40) *
+                              (widget.maxRange - widget.minRange) +
+                          widget.minRange)
+                      .toStringAsFixed(widget.decimalPlaces),
+                ),
                 Container(
                   width: 2,
                   height: 60,
@@ -75,34 +92,53 @@ class _ScaleRulerState extends State<ScaleRuler> {
 }
 
 class ScaleRulerPainter extends CustomPainter {
+  final double minRange; // Minimum value of the range
+  final double maxRange; // Maximum value of the range
+  final double lineSpacing; // Spacing between each line
+  final double rulerHeight; // Height of the ruler
+
+  ScaleRulerPainter({
+    required this.minRange,
+    required this.maxRange,
+    required this.lineSpacing,
+    required this.rulerHeight,
+  });
+
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
       ..color = Colors.black
       ..strokeWidth = 2;
 
-    double rulerHeight = size.height;
     double longLine = rulerHeight / 2;
     double mediumLine = rulerHeight / 3;
     double shortLine = rulerHeight / 4;
 
-    for (double i = 0; i <= size.width; i += 10) {
-      if (i % 50 == 0) {
+    // Calculate the number of lines based on minRange, maxRange, and lineSpacing
+    double range = maxRange - minRange;
+    int numLines = (range / lineSpacing).ceil();
+
+    for (int i = 0; i <= numLines; i++) {
+      double x = i * size.width / numLines;
+      double currentValue = minRange + i * lineSpacing;
+
+      if (currentValue % 50 == 0) {
         // Long line every 50 units
-        canvas.drawLine(Offset(i, 0), Offset(i, longLine), paint);
-        drawText(canvas, i.toInt().toString(), Offset(i, longLine + 5));
-      } else if (i % 25 == 0) {
+        canvas.drawLine(Offset(x, 0), Offset(x, longLine), paint);
+        drawText(
+            canvas, currentValue.toStringAsFixed(0), Offset(x, longLine + 5));
+      } else if (currentValue % 25 == 0) {
         // Medium line every 25 units
-        canvas.drawLine(Offset(i, 0), Offset(i, mediumLine), paint);
+        canvas.drawLine(Offset(x, 0), Offset(x, mediumLine), paint);
       } else {
-        // Short line every 10 units
-        canvas.drawLine(Offset(i, 0), Offset(i, shortLine), paint);
+        // Short line for other units
+        canvas.drawLine(Offset(x, 0), Offset(x, shortLine), paint);
       }
     }
   }
 
   void drawText(Canvas canvas, String text, Offset offset) {
-    final textStyle = const TextStyle(
+    const textStyle = TextStyle(
       color: Colors.black,
       fontSize: 12,
     );
