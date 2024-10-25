@@ -38,15 +38,8 @@ class _ScaleRulerState extends State<ScaleRuler> {
           _selectedPosition = _selectedPosition.clamp(
               0.0, MediaQuery.of(context).size.width - 40);
         });
-
-        // Calculate the selected value based on position
-        double selectedValue = widget.minRange +
-            (_selectedPosition /
-                (MediaQuery.of(context).size.width - 40)) *
-                (widget.maxRange - widget.minRange);
-
         // Log the selected value
-        log('Selected Value: ${selectedValue.toStringAsFixed(widget.decimalPlaces)}');
+        log('Selected Position: ${_selectedPosition.toInt()}');
       },
       child: Stack(
         children: [
@@ -54,14 +47,10 @@ class _ScaleRulerState extends State<ScaleRuler> {
             padding: const EdgeInsets.only(top: 22.0),
             child: Container(
               width: double.infinity,
-              height: widget.rulerHeight,
+              height: 100,
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: CustomPaint(
-                painter: ScaleRulerPainter(
-                  minRange: widget.minRange,
-                  maxRange: widget.maxRange,
-                  lineSpacing: widget.lineSpacing,
-                ),
+                painter: ScaleRulerPainter(),
               ),
             ),
           ),
@@ -70,10 +59,7 @@ class _ScaleRulerState extends State<ScaleRuler> {
             top: 0,
             child: Column(
               children: [
-                Text(
-                  _getSelectedValue().toStringAsFixed(widget.decimalPlaces),
-                  style: const TextStyle(color: Colors.black),
-                ),
+                Text(_selectedPosition.toStringAsFixed(1)),
                 Container(
                   width: 2,
                   height: 60,
@@ -86,26 +72,9 @@ class _ScaleRulerState extends State<ScaleRuler> {
       ),
     );
   }
-
-  double _getSelectedValue() {
-    return widget.minRange +
-        (_selectedPosition /
-            (MediaQuery.of(context).size.width - 40)) *
-            (widget.maxRange - widget.minRange);
-  }
 }
 
 class ScaleRulerPainter extends CustomPainter {
-  final double minRange;
-  final double maxRange;
-  final double lineSpacing;
-
-  ScaleRulerPainter({
-    required this.minRange,
-    required this.maxRange,
-    required this.lineSpacing,
-  });
-
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
@@ -117,14 +86,12 @@ class ScaleRulerPainter extends CustomPainter {
     double mediumLine = rulerHeight / 3;
     double shortLine = rulerHeight / 4;
 
-    for (double i = 0; i <= size.width; i += lineSpacing) {
-      double value = minRange + (i / size.width) * (maxRange - minRange);
-
-      if (value % 50 == 0) {
+    for (double i = 0; i <= size.width; i += 10) {
+      if (i % 50 == 0) {
         // Long line every 50 units
         canvas.drawLine(Offset(i, 0), Offset(i, longLine), paint);
-        drawText(canvas, value.toInt().toString(), Offset(i, longLine + 5));
-      } else if (value % 25 == 0) {
+        drawText(canvas, i.toInt().toString(), Offset(i, longLine + 5));
+      } else if (i % 25 == 0) {
         // Medium line every 25 units
         canvas.drawLine(Offset(i, 0), Offset(i, mediumLine), paint);
       } else {
@@ -135,7 +102,7 @@ class ScaleRulerPainter extends CustomPainter {
   }
 
   void drawText(Canvas canvas, String text, Offset offset) {
-    const textStyle = TextStyle(
+    final textStyle = const TextStyle(
       color: Colors.black,
       fontSize: 12,
     );
@@ -153,6 +120,6 @@ class ScaleRulerPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(CustomPainter oldDelegate) {
-    return true;
+    return false;
   }
 }
